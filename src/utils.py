@@ -12,6 +12,6 @@ def create_output(predictions):
     """
     submission = pd.DataFrame(data={"id": np.arange(len(predictions)),
                                     "ARRIVAL_DELAY": np.reshape(predictions, (len(predictions)))})
-    filename = f"submissions/submission_{datetime.now().strftime('%Y_%m_%d-%I_%M_%S_%p')}.csv"
+    filename = f"../submissions/submission_{datetime.now().strftime('%Y_%m_%d-%I_%M_%S_%p')}.csv"
     submission.to_csv(filename, index=False)
     return submission

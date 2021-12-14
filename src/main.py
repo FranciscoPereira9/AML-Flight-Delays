@@ -6,18 +6,16 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
 
 # Make NumPy printouts easier to read.
 np.set_printoptions(precision=3, suppress=True)
 
 
 # Read pre_proccesed data:
-pp_train = pd.read_csv("data/pp_flights_train.csv")
-pp_test = pd.read_csv("data/pp_flights_test.csv")
+pp_train = pd.read_csv("../data/pp_flights_train.csv")
+pp_test = pd.read_csv("../data/pp_flights_test.csv")
 # Build Model
-X, Y = pp_train['DEPARTURE_DELAY'].to_numpy().reshape(-1,1) , pp_train['ARRIVAL_DELAY']
+X, Y = pp_train['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1) , pp_train['ARRIVAL_DELAY']
 X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.05, random_state=42)
 X_test = pp_test['DEPARTURE_DELAY'].to_numpy().reshape(-1,1)
 lm = LinearRegression().fit(X_train,Y_train)

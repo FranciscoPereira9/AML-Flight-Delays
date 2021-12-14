@@ -86,16 +86,13 @@ def one_hot_encode_airports(df_train, df_test):
     return df_train, df_test
 
 
-
-
-
 if __name__ == "__main__":
     # Read Data
     # Original
-    airlines_raw = pd.read_csv("data/airlines.csv")
-    airports_raw = pd.read_csv("data/airports.csv")
-    flights_train_raw = pd.read_csv("data/flights_train.csv")
-    flights_test_raw = pd.read_csv("data/flights_test.csv")
+    airlines_raw = pd.read_csv("../data/airlines.csv")
+    airports_raw = pd.read_csv("../data/airports.csv")
+    flights_train_raw = pd.read_csv("../data/flights_train.csv")
+    flights_test_raw = pd.read_csv("../data/flights_test.csv")
     # Copies (work on the copies)
     airlines = airlines_raw.copy()
     airports = airports_raw.copy()
@@ -126,5 +123,5 @@ if __name__ == "__main__":
 
     print("Done")
     # Save pre-processed data
-    flights_train.to_csv("data/pp_flights_train.csv", index=False)
-    flights_test.to_csv("data/pp_flights_test.csv", index=False)
+    flights_train.to_csv("../data/pp_flights_train.csv", index=False)
+    flights_test.to_csv("../data/pp_flights_test.csv", index=False)
