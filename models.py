@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from sklearn.datasets import load_boston
 from sklearn.preprocessing import StandardScaler
 
+
 class MLP(nn.Module):
   '''
     Multilayer Perceptron for regression.

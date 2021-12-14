@@ -86,18 +86,7 @@ def one_hot_encode_airports(df_train, df_test):
     return df_train, df_test
 
 
-def create_output(predictions):
-    """
-    Function that creates output csv submission file. Returns the submission dataframe.
-    Input:
-    - predictions: an array with shape (n_predictions, 1) with the ARRIVAL_DELAY outputs (ordered).
-    Return:
-    - submission: dataframe with id and ARRIVAL_DELAY fields.
-    """
-    submission = pd.DataFrame(data={"id": np.arange(len(predictions)),
-                                    "ARRIVAL_DELAY": np.reshape(predictions,(len(predictions)))})
-    submission.to_csv("data/submission.csv", index=False)
-    return submission
+
 
 
 if __name__ == "__main__":
@@ -105,8 +94,8 @@ if __name__ == "__main__":
     # Original
     airlines_raw = pd.read_csv("data/airlines.csv")
     airports_raw = pd.read_csv("data/airports.csv")
-    flights_train_raw = pd.read_csv("data/flights_train.csv").iloc[:50000]
-    flights_test_raw = pd.read_csv("data/flights_test.csv").iloc[:5000]
+    flights_train_raw = pd.read_csv("data/flights_train.csv")
+    flights_test_raw = pd.read_csv("data/flights_test.csv")
     # Copies (work on the copies)
     airlines = airlines_raw.copy()
     airports = airports_raw.copy()
