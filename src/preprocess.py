@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import category_encoders as ce
 import datetime
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 # Make NumPy printouts easier to read.
 np.set_printoptions(precision=3, suppress=True)
 
@@ -56,52 +58,60 @@ def departure_delay(day, scheduled_departure, departure, arrival_delay=None):
 
 
 def one_hot_encode_main(df_train, df_test):
-    # Create Encoder Object
-    encoder = ce.BinaryEncoder(cols=['MONTH', 'DAY_OF_WEEK', 'AIRLINE', 'SCHEDULED_DEPARTURE'], return_df=True)
-    # Encode Train Set
-    df_train["SCHEDULED_DEPARTURE"] = df_train.apply(lambda row: "{0:04d}".format(int(row["SCHEDULED_DEPARTURE"])), axis=1)
-    df_train = encoder.fit_transform(df_train)
-    # Encode Test Set
-    df_test["SCHEDULED_DEPARTURE"] = df_test.apply(lambda row: "{0:04d}".format(int(row["SCHEDULED_DEPARTURE"])),axis=1)
-    df_test = encoder.fit_transform(df_test)
-    #df = pd.get_dummies(df, columns=['MONTH'], prefix='', prefix_sep='')
-    #df = pd.get_dummies(df, columns=['DAY_OF_WEEK'], prefix='', prefix_sep='')
-    #df = pd.get_dummies(df, columns=['AIRLINE'], prefix='AIRLINE', prefix_sep='_')
+    """
+    Receives train and test dataset. One Hot encodes variables MONTH,DAY_OF_WEEK,AIRLINE.
+    :param df_train:
+    :param df_test:
+    :return:
+    """
+    encoder = ce.OneHotEncoder(cols=['MONTH', 'DAY_OF_WEEK', 'AIRLINE'], return_df=True, use_cat_names=True)
+    encoder_fit = encoder.fit(df_train)
+    df_train = encoder_fit.transform(df_train)
+    df_test = encoder_fit.transform(df_test)
     return df_train, df_test
 
 
 def one_hot_encode_airports(df_train, df_test):
     # Create object for binary encoding
-    encoder = ce.BinaryEncoder(cols=['AIRPORTS'], return_df=True)
+    #encoder = ce.BinaryEncoder(cols=['AIRPORTS'], return_df=True)
     # Create target encoding object
     encoder_target = ce.TargetEncoder(cols=['AIRPORTS'], return_df=True)
     # Encode Train Set
     df_train['AIRPORTS'] = df_train['ORIGIN_AIRPORT'].str.cat(df_train['DESTINATION_AIRPORT'], sep="-")
-    df_train['AIRPORT_TargetEncoding'] = encoder_target.fit_transform(df_train['AIRPORTS'], df_train['DEPARTURE_DELAY'])
-    df_train = encoder.fit_transform(df_train)
+    df_train['AIRPORT_TargetEncoding'] = encoder_target.fit_transform(df_train['AIRPORTS'], df_train['ARRIVAL_DELAY'])
+    #df_train = encoder.fit_transform(df_train)
     # Encode Test Set
     df_test['AIRPORTS'] = df_test['ORIGIN_AIRPORT'].str.cat(df_test['DESTINATION_AIRPORT'], sep="-")
-    df_test['AIRPORT_TargetEncoding'] = encoder_target.fit_transform(df_test['AIRPORTS'], df_test['DEPARTURE_DELAY'])
-    df_test = encoder.fit_transform(df_test)
+    df_test['AIRPORT_TargetEncoding'] = encoder_target.fit_transform(df_test['AIRPORTS'], df_test['ARRIVAL_DELAY'])
+    #df_test = encoder.fit_transform(df_test)
+    return df_train, df_test
+
+
+def feature_encode_airports(df_train, df_test):
+    """
+
+    :param df_train:
+    :param df_test:
+    :return:
+    """
+    df_train['AIRPORTS'] = df_train['ORIGIN_AIRPORT'].str.cat(df_train['DESTINATION_AIRPORT'], sep="-")
+    df_test['AIRPORTS'] = df_test['ORIGIN_AIRPORT'].str.cat(df_test['DESTINATION_AIRPORT'], sep="-")
+    encoder = ce.TargetEncoder(cols=['AIRPORTS'], return_df=True)
+    encoder_fit = encoder.fit(df_train['AIRPORTS'], df_train['ARRIVAL_DELAY'])
+    df_train['AIRPORT_TargetEncoding'] = encoder_fit.transform(df_train['AIRPORTS'])
+    df_test['AIRPORT_TargetEncoding'] = encoder_fit.transform(df_test['AIRPORTS'])
     return df_train, df_test
 
 
 if __name__ == "__main__":
     # Read Data
     # Original
-    airlines_raw = pd.read_csv("../data/airlines.csv")
-    airports_raw = pd.read_csv("../data/airports.csv")
-    flights_train_raw = pd.read_csv("../data/flights_train.csv")
-    flights_test_raw = pd.read_csv("../data/flights_test.csv")
+    flights_train_raw = pd.read_csv("data/flights_train.csv")
+    flights_test_raw = pd.read_csv("data/flights_test.csv")
     # Copies (work on the copies)
-    airlines = airlines_raw.copy()
-    airports = airports_raw.copy()
     flights_train = flights_train_raw.copy()
     flights_test = flights_test_raw.copy()
-
-    # Drop columns that don't add information
-    flights_train.drop(columns=["WHEELS_OFF", "FLIGHT_NUMBER", "TAIL_NUMBER"], inplace=True)
-    flights_test.drop(columns=["WHEELS_OFF", "FLIGHT_NUMBER", "TAIL_NUMBER"], inplace=True)
+    flights_test["ARRIVAL_DELAY"] = np.nan
 
     # Create Date with Datetime obj
     flights_train = rearrange_date(flights_train)
@@ -116,12 +126,27 @@ if __name__ == "__main__":
                                                                                         row["SCHEDULED_DEPARTURE"],
                                                                                         row["DEPARTURE_TIME"]), axis=1)
 
+
     # OneHot Encode Labels
     flights_train, flights_test = one_hot_encode_main(flights_train, flights_test)
     # Origins and Destinations
-    flights_train, flights_test = one_hot_encode_airports(flights_train, flights_test)
+    flights_train, flights_test = feature_encode_airports(flights_train, flights_test)
+
+    # Fit Linear Model
+    X, Y = flights_train['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1), flights_train['ARRIVAL_DELAY']
+    lm = LinearRegression().fit(X, Y)
+    # Build prediction for Test Set
+    flights_train["LM_PREDICTIONS"] = lm.predict(X)
+    flights_train["RESIDUALS"] = flights_train["ARRIVAL_DELAY"] - flights_train["LM_PREDICTIONS"]
+
+    # Drop unnecessary columns
+    flights_train.drop(columns=["WHEELS_OFF", "FLIGHT_NUMBER", "TAIL_NUMBER", "ORIGIN_AIRPORT", 'DESTINATION_AIRPORT',
+                                'id', 'DATE'], inplace=True)
+    flights_test.drop(columns=["WHEELS_OFF", "FLIGHT_NUMBER", "TAIL_NUMBER", "ORIGIN_AIRPORT", 'DESTINATION_AIRPORT',
+                                'id', 'DATE'], inplace=True)
+
 
     print("Done")
     # Save pre-processed data
-    flights_train.to_csv("../data/pp_flights_train.csv", index=False)
-    flights_test.to_csv("../data/pp_flights_test.csv", index=False)
+    flights_train.to_csv("data/pp_flights_train.csv", index=False)
+    flights_test.to_csv("data/pp_flights_test.csv", index=False)

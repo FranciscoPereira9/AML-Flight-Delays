@@ -12,25 +12,24 @@ np.set_printoptions(precision=3, suppress=True)
 
 
 # Read pre_proccesed data:
-pp_train = pd.read_csv("../data/pp_flights_train.csv")
-pp_test = pd.read_csv("../data/pp_flights_test.csv")
-# Build Model
-X, Y = pp_train['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1) , pp_train['ARRIVAL_DELAY']
-X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.05, random_state=42)
-X_test = pp_test['DEPARTURE_DELAY'].to_numpy().reshape(-1,1)
-lm = LinearRegression().fit(X_train,Y_train)
-# Check Validation Metrics
-predictions_val = lm.predict(X_val)
-print("MSE =", metrics.mean_squared_error(predictions_val, Y_val))
+flights_train = pd.read_csv("data/flights_train.csv")
+flights_test = pd.read_csv("data/flights_test.csv")
+pp_train = pd.read_csv("data/pp_flights_train.csv")
+pp_test = pd.read_csv("data/pp_flights_test.csv")
+submission = pd.read_csv("data/2021_12_16-03_32_05_PM_xgboost.csv")
+# Fit Linear Model
+X, Y = pp_train['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1), pp_train['ARRIVAL_DELAY']
+X_test = pp_test['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1)
+lm = LinearRegression().fit(X, Y)
 # Build prediction for Test Set
-predictions_test = lm.predict(X_test)
-
+flights_test["LM_PREDICTIONS"] = lm.predict(X_test)
+submission["ARRIVAL_DELAY"] = flights_test["LM_PREDICTIONS"]+submission["RESIDUALS"]
+submission.drop(columns="RESIDUALS", inplace=True)
 # Visualize Results
 # Plot model regression line on top of actual delays - Baseline
-plt.scatter(X_val.reshape(-1), Y_val.to_numpy())
-plt.plot(X_val.reshape(-1), predictions_val.reshape(-1), color='orange')
+plt.scatter(submission.index.to_numpy(), submission.ARRIVAL_DELAY.to_numpy())
+plt.plot(submission.index.to_numpy(), flights_test.LM_PREDICTIONS.to_numpy(), color='orange')
 plt.show()
-# Train Model
-
-# Output Predictions
-utils.create_output(predictions_test)
+# To csv
+submission.to_csv("data/submission.csv", index=False)
+print("DONE")
