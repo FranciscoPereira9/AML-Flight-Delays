@@ -132,3 +132,4 @@ dmypy.json
 submissions/submission_*
 *.csv
 model/*
+node/notebooks/data/*
