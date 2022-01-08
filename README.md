@@ -4,11 +4,14 @@
 
 Predicting flight delays - final project for Applied Machine Learning at University of Amsterdam.  
 
+## Poster
+
+ [NODE_FlightDelayPrediction.pdf](NODE_FlightDelayPrediction.pdf) 
+
+
 ## To Do
 
-- [ ] Paper Summary -> Aukje, Nathalie
-
-- [ ] 
+- [x] Poster
 
 - Pre-processing:  (Nina)
   - [x] Drop columns that do not matter - TAIL_NUMBER, FLIGHT_NUMBER, WEELS_OFF, id
@@ -20,11 +23,12 @@ Predicting flight delays - final project for Applied Machine Learning at Univers
 - Modelling:
   - [x] Linear Regression between Departure Delay x Arrival Delay
   - [x] NODE Algorithm Running on our data 
+  
 - Thing to try:
-	- [ ] Adam Optimizer
+	- [x] Adam Optimizer (did not improve)
+	- [x] Autoencoder to calculate an input embedding space (did not improve)
 	- [ ] Non-Oblivious Decision Trees (Asymetric)
-	- [ ] Softmax 
-	- [ ] FCN to 
+	- [x] FCN (did not improve)
 
   ## Hyper-parameter Tuning
 
@@ -33,7 +37,7 @@ Predicting flight delays - final project for Applied Machine Learning at Univers
 | 2021_12_16-06_51_40_PM | 128    | 4      | 3              | 6     | 92.45 | 94.570  |
 | 2021_12_17-02_18_31_PM | 128    | 6      | 3              | 6     | 92.24 | 91.006  |
 | 2021_12_17-03_50_42_PM | 128    | 4      | 6              | 6     | 92.00 | 90.870  |
-| 2021_12_18-03_07_10_PM | 256    | 8      | 5              | 6     |       | 96.33   |
-| Encoded_NODES          | 256    | 8      | 5              | 6     |       |         |
-| On ARRIVAL_DELAY       | 64     | 5      | 8              | 4     |       |         |
+| 2021_12_18-03_07_10_PM | 256    | 8      | 5              | 6     | 94.29 | 96.33   |
+| Encoded_NODES          | 256    | 8      | 5              | 6     | 96.32 | 98.23   |
+| On ARRIVAL_DELAY       | 64     | 5      | 8              | 4     | 94.32 | 95.79   |
 
