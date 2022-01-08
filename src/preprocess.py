@@ -103,6 +103,18 @@ def feature_encode_airports(df_train, df_test):
     return df_train, df_test
 
 
+def cat_encode(df_train, df_test):
+    df_train['AIRPORTS'] = df_train['ORIGIN_AIRPORT'].str.cat(df_train['DESTINATION_AIRPORT'], sep="-")
+    df_test['AIRPORTS'] = df_test['ORIGIN_AIRPORT'].str.cat(df_test['DESTINATION_AIRPORT'], sep="-")
+    cat_features = ['MONTH', "DAY_OF_WEEK", "AIRLINE", "FLIGHT_NUMBER", "TAIL_NUMBER", "ORIGIN_AIRPORT",
+                    'DESTINATION_AIRPORT', "AIRPORTS"]
+    cat_encoder = ce.LeaveOneOutEncoder()
+    cat_encoder.fit(df_train[cat_features], df_train["ARRIVAL_DELAY"])
+    df_train[cat_features] = cat_encoder.transform(df_train[cat_features])
+    df_test[cat_features] = cat_encoder.transform(df_test[cat_features])
+    return df_train, df_test
+
+
 if __name__ == "__main__":
     # Read Data
     # Original
@@ -128,9 +140,11 @@ if __name__ == "__main__":
 
 
     # OneHot Encode Labels
-    flights_train, flights_test = one_hot_encode_main(flights_train, flights_test)
+    #flights_train, flights_test = one_hot_encode_main(flights_train, flights_test)
     # Origins and Destinations
-    flights_train, flights_test = feature_encode_airports(flights_train, flights_test)
+    #flights_train, flights_test = feature_encode_airports(flights_train, flights_test)
+    # Encode everything
+    flights_train, flights_test = cat_encode(flights_train, flights_test)
 
     # Fit Linear Model
     X, Y = flights_train['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1), flights_train['ARRIVAL_DELAY']
@@ -140,13 +154,11 @@ if __name__ == "__main__":
     flights_train["RESIDUALS"] = flights_train["ARRIVAL_DELAY"] - flights_train["LM_PREDICTIONS"]
 
     # Drop unnecessary columns
-    flights_train.drop(columns=["WHEELS_OFF", "FLIGHT_NUMBER", "TAIL_NUMBER", "ORIGIN_AIRPORT", 'DESTINATION_AIRPORT',
-                                'id', 'DATE'], inplace=True)
-    flights_test.drop(columns=["WHEELS_OFF", "FLIGHT_NUMBER", "TAIL_NUMBER", "ORIGIN_AIRPORT", 'DESTINATION_AIRPORT',
-                                'id', 'DATE'], inplace=True)
+    #flights_train.drop(columns=["WHEELS_OFF", 'id', 'DATE'], inplace=True)
+    #flights_test.drop(columns=["WHEELS_OFF", 'id', 'DATE'], inplace=True)
 
 
     print("Done")
     # Save pre-processed data
-    flights_train.to_csv("data/pp_flights_train.csv", index=False)
-    flights_test.to_csv("data/pp_flights_test.csv", index=False)
+    flights_train.to_csv("data/pp_flights3_train.csv", index=False)
+    flights_test.to_csv("data/pp_flights3_test.csv", index=False)

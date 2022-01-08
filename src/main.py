@@ -10,13 +10,13 @@ from sklearn import metrics
 # Make NumPy printouts easier to read.
 np.set_printoptions(precision=3, suppress=True)
 
-
+filename = "2021_12_19-03_06_40_PM"
 # Read pre_proccesed data:
 flights_train = pd.read_csv("data/flights_train.csv")
 flights_test = pd.read_csv("data/flights_test.csv")
 pp_train = pd.read_csv("data/pp_flights_train.csv")
 pp_test = pd.read_csv("data/pp_flights_test.csv")
-submission = pd.read_csv("data/2021_12_16-03_32_05_PM_xgboost.csv")
+submission = pd.read_csv("data/residuals/"+filename+".csv")
 # Fit Linear Model
 X, Y = pp_train['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1), pp_train['ARRIVAL_DELAY']
 X_test = pp_test['DEPARTURE_DELAY'].to_numpy().reshape(-1, 1)
@@ -31,5 +31,5 @@ plt.scatter(submission.index.to_numpy(), submission.ARRIVAL_DELAY.to_numpy())
 plt.plot(submission.index.to_numpy(), flights_test.LM_PREDICTIONS.to_numpy(), color='orange')
 plt.show()
 # To csv
-submission.to_csv("data/submission.csv", index=False)
+submission.to_csv("submissions/"+filename+".csv", index=False)
 print("DONE")
